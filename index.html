@@ -20,7 +20,7 @@
             height: 100vh;
         }
 
-        /* --- Floating Hearts --- */
+        /* --- Floating Hearts Background --- */
         .floating-heart {
             position: absolute;
             color: #ffb3c1;
@@ -35,30 +35,30 @@
             to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* --- Envelope & Letter --- */
-        .envelope-container { position: relative; cursor: pointer; }
+        /* --- Envelope Animation --- */
+        .envelope-container { position: relative; cursor: pointer; z-index: 10; }
         
         .envelope {
-            position: relative; width: 320px; height: 200px;
+            position: relative; width: 300px; height: 180px;
             background: #ffccd5; border-radius: 0 0 10px 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         .envelope::after {
             content: ""; position: absolute; top: 0;
-            border-top: 110px solid #ffb3c1; border-left: 160px solid transparent;
-            border-right: 160px solid transparent;
+            border-top: 100px solid #ffb3c1; border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
             transform-origin: top; transition: transform 0.6s; z-index: 2;
         }
 
         .seal {
-            position: absolute; top: 85px; left: 135px; z-index: 3;
+            position: absolute; top: 75px; left: 130px; z-index: 3;
             font-size: 40px; transition: opacity 0.4s;
         }
 
         .letter {
-            position: absolute; bottom: 10px; left: 10px; width: 300px;
-            background: white; padding: 25px; border-radius: 5px;
+            position: absolute; bottom: 10px; left: 10px; width: 280px;
+            background: white; padding: 20px; border-radius: 5px;
             text-align: center; box-sizing: border-box;
             transition: transform 0.8s ease-in-out, opacity 0.6s;
             z-index: 1; opacity: 0;
@@ -67,7 +67,7 @@
         .opened .envelope::after { transform: rotateX(180deg); }
         .opened .seal { opacity: 0; }
         .opened .letter { 
-            transform: translateY(-160px); 
+            transform: translateY(-140px); 
             opacity: 1; 
             z-index: 4;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -75,29 +75,46 @@
 
         button {
             background: var(--accent-color); color: white; border: none;
-            padding: 10px 18px; border-radius: 25px; margin: 5px;
+            padding: 8px 15px; border-radius: 20px; margin: 5px;
             cursor: pointer; font-family: 'Georgia', serif; font-weight: bold;
         }
 
-        /* Kiss Effect */
+        /* --- CENTERED KISS EMOJI --- */
         .kiss-mark {
-            position: fixed; top: 50%; left: 50%;
+            position: fixed; /* Stays in center of screen */
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 80px; pointer-events: none; z-index: 999;
+            font-size: 100px; /* Big and clear */
+            pointer-events: none;
+            z-index: 9999; /* Above everything */
             animation: kiss-bloom 0.8s ease-out forwards;
         }
 
         @keyframes kiss-bloom {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+            50% { opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
 
-        /* Small Player Display */
+        /* --- TINY VIDEO PLAYER --- */
         #music-container {
-            position: fixed; bottom: 10px; right: 10px;
-            width: 100px; height: 60px; 
-            border: 2px solid #ffccd5; border-radius: 5px;
-            overflow: hidden; background: black;
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            width: 40px; /* Very small */
+            height: 40px; 
+            border-radius: 50%; /* Circular */
+            overflow: hidden;
+            opacity: 0.2; /* Faded */
+            border: 1px solid var(--accent-color);
+            transition: opacity 0.3s;
+        }
+        #music-container:hover { opacity: 1; } /* Peek if hovered */
+
+        #player-wrapper {
+            transform: scale(0.5); /* Shrinks the video inside */
+            transform-origin: top left;
         }
     </style>
 </head>
@@ -107,12 +124,12 @@
         <div class="envelope">
             <div class="seal">💌</div>
             <div class="letter">
-                <p style="font-size: 11px; text-transform: uppercase;">Tap here</p>
-                <h2 style="color:var(--accent-color)">To my dearest Rash,</h2>
-                <p>Happy Valentine's Day.</p>
+                <p style="font-size: 10px; color: #999;">Tap here</p>
+                <h2 style="color:var(--accent-color); margin: 0;">To my dearest Rash,</h2>
+                <p style="margin: 10px 0;">Happy Valentine's Day.</p>
                 <p><strong>Njan Ninne Snehikkunnu</strong></p>
                 
-                <div style="margin-top:15px">
+                <div style="margin-top:10px">
                     <button onclick="spawnKiss(event)">Kisses 💋</button>
                     <button id="musicBtn" onclick="playMusic(event)">Love Tunes 🎵</button>
                 </div>
@@ -121,11 +138,13 @@
     </div>
 
     <div id="music-container">
-        <div id="player"></div>
+        <div id="player-wrapper">
+            <div id="player"></div>
+        </div>
     </div>
 
     <script>
-        // Floating Hearts
+        // Floating Hearts Background
         setInterval(() => {
             const heart = document.createElement('div');
             heart.className = 'floating-heart';
@@ -140,16 +159,19 @@
             document.getElementById('wrapper').classList.add('opened');
         }
 
+        // Center Kiss Logic
         function spawnKiss(e) {
             e.stopPropagation();
             const kiss = document.createElement('div');
             kiss.className = 'kiss-mark';
             kiss.innerHTML = '💋';
             document.body.appendChild(kiss);
+            
+            // Remove after animation finishes
             setTimeout(() => kiss.remove(), 800);
         }
 
-        // --- YouTube API Logic ---
+        // YouTube API
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -158,23 +180,16 @@
         var player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '60',
-                width: '100',
-                videoId: 'cmMiyZaSELo', // Your requested song ID
+                height: '80',
+                width: '120',
+                videoId: 'cmMiyZaSELo', 
                 playerVars: { 
                     'autoplay': 0, 
-                    'controls': 1, 
+                    'controls': 0, 
                     'modestbranding': 1,
                     'origin': window.location.origin 
-                },
-                events: {
-                    'onReady': onPlayerReady
                 }
             });
-        }
-
-        function onPlayerReady(event) {
-            console.log("Player is ready");
         }
 
         function playMusic(e) {
@@ -182,8 +197,6 @@
             if (player && player.playVideo) {
                 player.playVideo();
                 document.getElementById('musicBtn').innerText = "Playing... 🎵";
-            } else {
-                alert("Please wait a moment for the music to load, then try again!");
             }
         }
     </script>
