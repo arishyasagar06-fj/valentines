@@ -20,13 +20,13 @@
             height: 100vh;
         }
 
-        /* --- Floating Hearts Background --- */
+        /* --- Floating Hearts --- */
         .floating-heart {
             position: absolute;
             color: #ffb3c1;
             font-size: 18px;
             pointer-events: none;
-            z-index: -1;
+            z-index: 1;
             animation: fall linear forwards;
         }
 
@@ -58,18 +58,19 @@
 
         .letter {
             position: absolute; bottom: 10px; left: 10px; width: 280px;
-            background: white; padding: 20px; border-radius: 5px;
+            background: white; padding: 25px; border-radius: 5px;
             text-align: center; box-sizing: border-box;
             transition: transform 0.8s ease-in-out, opacity 0.6s;
-            z-index: 1; opacity: 0;
+            z-index: 1; opacity: 0; pointer-events: none;
         }
 
         .opened .envelope::after { transform: rotateX(180deg); }
-        .opened .seal { opacity: 0; }
+        .opened .seal { opacity: 0; pointer-events: none; }
         .opened .letter { 
             transform: translateY(-140px); 
             opacity: 1; 
             z-index: 4;
+            pointer-events: auto;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
@@ -79,52 +80,49 @@
             cursor: pointer; font-family: 'Georgia', serif; font-weight: bold;
         }
 
-        /* --- CENTERED KISS EMOJI --- */
+        .close-btn {
+            background: #999;
+            font-size: 10px;
+            margin-top: 15px;
+        }
+
+        /* --- THE KISS FIX --- */
         .kiss-mark {
-            position: fixed; /* Stays in center of screen */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 100px; /* Big and clear */
+            position: fixed;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            font-size: 120px;
             pointer-events: none;
-            z-index: 9999; /* Above everything */
+            z-index: 10000 !important;
+            display: block !important;
             animation: kiss-bloom 0.8s ease-out forwards;
         }
 
         @keyframes kiss-bloom {
-            0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
-            50% { opacity: 1; }
+            0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+            40% { opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
 
-        /* --- TINY VIDEO PLAYER --- */
+        /* --- INVISIBLE PLAYER --- */
         #music-container {
             position: fixed;
-            bottom: 5px;
-            right: 5px;
-            width: 40px; /* Very small */
-            height: 40px; 
-            border-radius: 50%; /* Circular */
+            bottom: -100px; /* Hide off screen */
+            right: -100px;
+            width: 1px;
+            height: 1px;
             overflow: hidden;
-            opacity: 0.2; /* Faded */
-            border: 1px solid var(--accent-color);
-            transition: opacity 0.3s;
-        }
-        #music-container:hover { opacity: 1; } /* Peek if hovered */
-
-        #player-wrapper {
-            transform: scale(0.5); /* Shrinks the video inside */
-            transform-origin: top left;
+            opacity: 0.01;
         }
     </style>
 </head>
 <body>
 
-    <div class="envelope-container" id="wrapper" onclick="openEnvelope()">
-        <div class="envelope">
-            <div class="seal">💌</div>
+    <div class="envelope-container" id="wrapper">
+        <div class="envelope" onclick="openEnvelope()">
+            <div class="seal">❤️</div>
             <div class="letter">
-                <p style="font-size: 10px; color: #999;">Tap here</p>
                 <h2 style="color:var(--accent-color); margin: 0;">To my dearest Rash,</h2>
                 <p style="margin: 10px 0;">Happy Valentine's Day.</p>
                 <p><strong>Njan Ninne Snehikkunnu</strong></p>
@@ -133,72 +131,21 @@
                     <button onclick="spawnKiss(event)">Kisses 💋</button>
                     <button id="musicBtn" onclick="playMusic(event)">Love Tunes 🎵</button>
                 </div>
+                <button class="close-btn" onclick="closeEnvelope(event)">Close Letter</button>
             </div>
         </div>
     </div>
 
     <div id="music-container">
-        <div id="player-wrapper">
-            <div id="player"></div>
-        </div>
+        <div id="player"></div>
     </div>
 
     <script>
-        // Floating Hearts Background
+        // Floating Hearts
         setInterval(() => {
             const heart = document.createElement('div');
             heart.className = 'floating-heart';
             heart.innerHTML = '❤️';
             heart.style.left = Math.random() * 100 + 'vw';
             heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 6000);
-        }, 400);
-
-        function openEnvelope() {
-            document.getElementById('wrapper').classList.add('opened');
-        }
-
-        // Center Kiss Logic
-        function spawnKiss(e) {
-            e.stopPropagation();
-            const kiss = document.createElement('div');
-            kiss.className = 'kiss-mark';
-            kiss.innerHTML = '💋';
-            document.body.appendChild(kiss);
-            
-            // Remove after animation finishes
-            setTimeout(() => kiss.remove(), 800);
-        }
-
-        // YouTube API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '80',
-                width: '120',
-                videoId: 'cmMiyZaSELo', 
-                playerVars: { 
-                    'autoplay': 0, 
-                    'controls': 0, 
-                    'modestbranding': 1,
-                    'origin': window.location.origin 
-                }
-            });
-        }
-
-        function playMusic(e) {
-            e.stopPropagation();
-            if (player && player.playVideo) {
-                player.playVideo();
-                document.getElementById('musicBtn').innerText = "Playing... 🎵";
-            }
-        }
-    </script>
-</body>
-</html>
+            document.body.appendChild(
